@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`Multicall gas cost of pay w/ multicall 1`] = `45942`;
+
+exports[`Multicall gas cost of pay w/o multicall 1`] = `43386`;

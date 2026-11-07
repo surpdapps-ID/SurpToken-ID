@@ -1,0 +1,18 @@
+{
+  "network": "amoy",
+  "chainId": 80002,
+  "deployedAt": "2026-11-07T21:26:52.168Z",
+  "deployer": "0xfbe90f900c1890e232fD7F09295436e0Fc7eCeF8",
+  "contracts": {
+    "SurpSwapFactory": "0x0B131B5a9673f81e561dD58EC11dEB122DC27a78",
+    "WETH9": "0x81e6D597F2c5A4144e9C2ACa8c516bc9A5891e5F",
+    "SurpSwapNFTDescriptor": "0x0FF8e9adAfe07070807e56852894df627b556BDE",
+    "SurpSwapV3PositionDescriptor": "0x2352214Fc4a13D93129d8F6c50403505742AdA2A",
+    "SurpSwapV3PositionManager": "0x8a988086F9CC70F7792a10406dB18d49EAaA6467",
+    "SurpSwapV3SwapRouter": "0xfFf91aEF8B1cd25a652AeD8ec1B24aE4582E6164",
+    "SurpSwapV3Quoter": "0x8d58C5ED46d8AE00886887e17dFa8345aa9C555A",
+    "SurpSwapV3QuoterV2": "0x8b293318Ebb03074a3D16fFde48272578E8f357B",
+    "SurpSwapV3TickLens": "0x41d70baF8A6891Aee69C5c1e70613085e3A37dB2",
+    "SurpSwapV3Migrator": "0xDF2476238d5AA2Df078fB56Bb4A8199B7Da5e902"
+  }
+}

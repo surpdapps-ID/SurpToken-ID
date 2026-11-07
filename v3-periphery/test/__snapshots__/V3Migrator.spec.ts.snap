@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SurpSwapV3Migrator #migrate gas 1`] = `731519`;
+
+exports[`V3Migrator #migrate gas 1`] = `731519`;

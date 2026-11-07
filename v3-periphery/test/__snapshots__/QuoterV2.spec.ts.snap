@@ -1,0 +1,101 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`QuoterV2 quotes #quoteExactInput 0 -> 2 -> 1 1`] = `280488`;
+
+exports[`QuoterV2 quotes #quoteExactInput 0 -> 2 cross 0 tick, starting tick initialized 1`] = `124218`;
+
+exports[`QuoterV2 quotes #quoteExactInput 0 -> 2 cross 0 tick, starting tick not initialized 1`] = `101383`;
+
+exports[`QuoterV2 quotes #quoteExactInput 0 -> 2 cross 1 tick 1`] = `145145`;
+
+exports[`QuoterV2 quotes #quoteExactInput 0 -> 2 cross 2 tick 1`] = `182742`;
+
+exports[`QuoterV2 quotes #quoteExactInput 0 -> 2 cross 2 tick where after is initialized 1`] = `145183`;
+
+exports[`QuoterV2 quotes #quoteExactInput 2 -> 0 cross 0 tick, starting tick initialized 1`] = `98075`;
+
+exports[`QuoterV2 quotes #quoteExactInput 2 -> 0 cross 0 tick, starting tick not initialized 1`] = `94200`;
+
+exports[`QuoterV2 quotes #quoteExactInput 2 -> 0 cross 2 1`] = `175554`;
+
+exports[`QuoterV2 quotes #quoteExactInput 2 -> 0 cross 2 where tick after is initialized 1`] = `175562`;
+
+exports[`QuoterV2 quotes #quoteExactInput 2 -> 1 1`] = `97750`;
+
+exports[`QuoterV2 quotes #quoteExactInputSingle 0 -> 2 1`] = `182724`;
+
+exports[`QuoterV2 quotes #quoteExactInputSingle 2 -> 0 1`] = `175526`;
+
+exports[`QuoterV2 quotes #quoteExactOutput 0 -> 2 -> 1 1`] = `280088`;
+
+exports[`QuoterV2 quotes #quoteExactOutput 0 -> 2 cross 0 tick starting tick initialized 1`] = `123773`;
+
+exports[`QuoterV2 quotes #quoteExactOutput 0 -> 2 cross 0 tick starting tick not initialized 1`] = `100958`;
+
+exports[`QuoterV2 quotes #quoteExactOutput 0 -> 2 cross 1 tick 1`] = `144431`;
+
+exports[`QuoterV2 quotes #quoteExactOutput 0 -> 2 cross 2 tick 1`] = `181784`;
+
+exports[`QuoterV2 quotes #quoteExactOutput 0 -> 2 cross 2 where tick after is initialized 1`] = `144469`;
+
+exports[`QuoterV2 quotes #quoteExactOutput 2 -> 0 cross 1 tick 1`] = `138279`;
+
+exports[`QuoterV2 quotes #quoteExactOutput 2 -> 0 cross 2 ticks 1`] = `175624`;
+
+exports[`QuoterV2 quotes #quoteExactOutput 2 -> 0 cross 2 where tick after is initialized 1`] = `175618`;
+
+exports[`QuoterV2 quotes #quoteExactOutput 2 -> 1 1`] = `98291`;
+
+exports[`QuoterV2 quotes #quoteExactOutputSingle 0 -> 1 1`] = `105621`;
+
+exports[`QuoterV2 quotes #quoteExactOutputSingle 1 -> 0 1`] = `98932`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactInput 0 -> 2 -> 1 1`] = `280488`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactInput 0 -> 2 cross 0 tick, starting tick initialized 1`] = `124218`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactInput 0 -> 2 cross 0 tick, starting tick not initialized 1`] = `101383`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactInput 0 -> 2 cross 1 tick 1`] = `145145`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactInput 0 -> 2 cross 2 tick 1`] = `182742`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactInput 0 -> 2 cross 2 tick where after is initialized 1`] = `145183`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactInput 2 -> 0 cross 0 tick, starting tick initialized 1`] = `98075`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactInput 2 -> 0 cross 0 tick, starting tick not initialized 1`] = `94200`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactInput 2 -> 0 cross 2 1`] = `175554`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactInput 2 -> 0 cross 2 where tick after is initialized 1`] = `175562`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactInput 2 -> 1 1`] = `97750`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactInputSingle 0 -> 2 1`] = `182724`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactInputSingle 2 -> 0 1`] = `175526`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactOutput 0 -> 2 -> 1 1`] = `280088`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactOutput 0 -> 2 cross 0 tick starting tick initialized 1`] = `123773`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactOutput 0 -> 2 cross 0 tick starting tick not initialized 1`] = `100958`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactOutput 0 -> 2 cross 1 tick 1`] = `144431`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactOutput 0 -> 2 cross 2 tick 1`] = `181784`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactOutput 0 -> 2 cross 2 where tick after is initialized 1`] = `144469`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactOutput 2 -> 0 cross 1 tick 1`] = `138279`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactOutput 2 -> 0 cross 2 ticks 1`] = `175624`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactOutput 2 -> 0 cross 2 where tick after is initialized 1`] = `175618`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactOutput 2 -> 1 1`] = `98291`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactOutputSingle 0 -> 1 1`] = `105621`;
+
+exports[`SurpSwapV3QuoterV2 quotes #quoteExactOutputSingle 1 -> 0 1`] = `98932`;

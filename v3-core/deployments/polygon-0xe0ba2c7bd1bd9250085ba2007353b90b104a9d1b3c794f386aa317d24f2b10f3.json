@@ -1,0 +1,13 @@
+{
+  "contract": "SurpSwapFactory",
+  "network": "polygon",
+  "chainId": 137,
+  "deployer": "0x5cC5B49a7ca420F0ee009f294F67FC452Fc1939F",
+  "deployerBalance": "3.983531781449786496",
+  "factory": "0x0dB995B73CeA857cEB24c7B3135eC9a64A12e0c6",
+  "owner": "0x5cC5B49a7ca420F0ee009f294F67FC452Fc1939F",
+  "transaction": "0xe0ba2c7bd1bd9250085ba2007353b90b104a9d1b3c794f386aa317d24f2b10f3",
+  "block": 96917420,
+  "explorer": "https://polygonscan.com/address/0x0dB995B73CeA857cEB24c7B3135eC9a64A12e0c6",
+  "poolInitCodeHash": "0xe34f199b19b2b4f47f68442619d555527d244f78a3297ea89325f843f87b8b54"
+}

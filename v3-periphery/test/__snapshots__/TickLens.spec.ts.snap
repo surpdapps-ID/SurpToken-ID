@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SurpSwapV3TickLens #getPopulatedTicksInWord fully populated ticks 1`] = `2817737`;
+
+exports[`SurpSwapV3TickLens #getPopulatedTicksInWord gas for single populated tick 1`] = `55742`;
+
+exports[`TickLens #getPopulatedTicksInWord fully populated ticks 1`] = `2817737`;
+
+exports[`TickLens #getPopulatedTicksInWord gas for single populated tick 1`] = `55742`;

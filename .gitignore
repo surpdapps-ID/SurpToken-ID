@@ -1,0 +1,10 @@
+.env
+.env.*
+!.env.example
+deployments/*.json
+/node_modules/
+/artifacts/
+/cache/
+/typechain/
+/coverage/
+/dist/

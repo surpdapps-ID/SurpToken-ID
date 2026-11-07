@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SurpSwapFactory #createPool gas 1`] = `4558577`;
+
+exports[`SurpSwapFactory factory bytecode size 1`] = `24556`;
+
+exports[`SurpSwapFactory pool bytecode size 1`] = `22142`;

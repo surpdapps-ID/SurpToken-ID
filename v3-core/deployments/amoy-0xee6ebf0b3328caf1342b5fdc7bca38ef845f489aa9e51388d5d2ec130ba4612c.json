@@ -1,0 +1,13 @@
+{
+  "contract": "SurpSwapFactory",
+  "network": "amoy",
+  "chainId": 80002,
+  "deployer": "0xfbe90f900c1890e232fD7F09295436e0Fc7eCeF8",
+  "deployerBalance": "31.974386946183101868",
+  "factory": "0x0B131B5a9673f81e561dD58EC11dEB122DC27a78",
+  "owner": "0xfbe90f900c1890e232fD7F09295436e0Fc7eCeF8",
+  "transaction": "0xee6ebf0b3328caf1342b5fdc7bca38ef845f489aa9e51388d5d2ec130ba4612c",
+  "block": 52251776,
+  "explorer": "https://amoy.polygonscan.com/address/0x0B131B5a9673f81e561dD58EC11dEB122DC27a78",
+  "poolInitCodeHash": "0xe34f199b19b2b4f47f68442619d555527d244f78a3297ea89325f843f87b8b54"
+}

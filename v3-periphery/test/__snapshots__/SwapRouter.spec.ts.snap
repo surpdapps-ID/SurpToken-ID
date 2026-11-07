@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SurpSwapV3SwapRouter bytecode size 1`] = `12021`;
+
+exports[`SwapRouter bytecode size 1`] = `12021`;
