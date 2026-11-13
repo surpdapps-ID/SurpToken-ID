@@ -23,6 +23,7 @@ library SurpSwapNFTDescriptor {
     using HexStrings for uint256;
 
     uint256 constant sqrt10X128 = 1076067327063303206878105757264492625226;
+    bytes16 private constant JSON_HEX_SYMBOLS = '0123456789abcdef';
 
     struct ConstructTokenURIParams {
         uint256 tokenId;
@@ -45,14 +46,14 @@ library SurpSwapNFTDescriptor {
         string memory name = generateName(params, feeToPercentString(params.fee));
         string memory descriptionPartOne =
             generateDescriptionPartOne(
-                escapeQuotes(params.quoteTokenSymbol),
-                escapeQuotes(params.baseTokenSymbol),
+                escapeJSON(params.quoteTokenSymbol),
+                escapeJSON(params.baseTokenSymbol),
                 addressToString(params.poolAddress)
             );
         string memory descriptionPartTwo =
             generateDescriptionPartTwo(
                 params.tokenId.toString(),
-                escapeQuotes(params.baseTokenSymbol),
+                escapeJSON(params.baseTokenSymbol),
                 addressToString(params.quoteTokenAddress),
                 addressToString(params.baseTokenAddress),
                 feeToPercentString(params.fee)
@@ -82,26 +83,41 @@ library SurpSwapNFTDescriptor {
             );
     }
 
-    function escapeQuotes(string memory symbol) internal pure returns (string memory) {
-        bytes memory symbolBytes = bytes(symbol);
-        uint8 quotesCount = 0;
-        for (uint8 i = 0; i < symbolBytes.length; i++) {
-            if (symbolBytes[i] == '"') {
-                quotesCount++;
+    function escapeJSON(string memory value) internal pure returns (string memory) {
+        bytes memory input = bytes(value);
+        uint256 escapedLength = input.length;
+        for (uint256 i = 0; i < input.length; i++) {
+            uint8 character = uint8(input[i]);
+            if (character == 0x22 || character == 0x5c) {
+                escapedLength++;
+            } else if (character < 0x20) {
+                escapedLength += 5;
             }
         }
-        if (quotesCount > 0) {
-            bytes memory escapedBytes = new bytes(symbolBytes.length + (quotesCount));
-            uint256 index;
-            for (uint8 i = 0; i < symbolBytes.length; i++) {
-                if (symbolBytes[i] == '"') {
-                    escapedBytes[index++] = '\\';
-                }
-                escapedBytes[index++] = symbolBytes[i];
-            }
-            return string(escapedBytes);
+
+        if (escapedLength == input.length) {
+            return value;
         }
-        return symbol;
+
+        bytes memory escaped = new bytes(escapedLength);
+        uint256 outputIndex;
+        for (uint256 i = 0; i < input.length; i++) {
+            uint8 character = uint8(input[i]);
+            if (character == 0x22 || character == 0x5c) {
+                escaped[outputIndex++] = '\\';
+                escaped[outputIndex++] = input[i];
+            } else if (character < 0x20) {
+                escaped[outputIndex++] = '\\';
+                escaped[outputIndex++] = 'u';
+                escaped[outputIndex++] = '0';
+                escaped[outputIndex++] = '0';
+                escaped[outputIndex++] = JSON_HEX_SYMBOLS[character >> 4];
+                escaped[outputIndex++] = JSON_HEX_SYMBOLS[character & 0x0f];
+            } else {
+                escaped[outputIndex++] = input[i];
+            }
+        }
+        return string(escaped);
     }
 
     function generateDescriptionPartOne(
@@ -163,9 +179,9 @@ library SurpSwapNFTDescriptor {
                     'SurpSwap - ',
                     feeTier,
                     ' - ',
-                    escapeQuotes(params.quoteTokenSymbol),
+                    escapeJSON(params.quoteTokenSymbol),
                     '/',
-                    escapeQuotes(params.baseTokenSymbol),
+                    escapeJSON(params.baseTokenSymbol),
                     ' - ',
                     tickToDecimalString(
                         !params.flipRatio ? params.tickLower : params.tickUpper,

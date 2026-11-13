@@ -218,6 +218,31 @@ describe('SurpSwapNFTDescriptor', () => {
       expect(json.name).to.equal(tokenMetadata.name)
     })
 
+    it('escapes JSON control characters and backslashes in token symbols', async () => {
+      quoteTokenSymbol = '"\\\n\t\u0000'
+      const json = extractJSONFromURI(
+        await nftDescriptor.constructTokenURI({
+          tokenId,
+          baseTokenAddress,
+          quoteTokenAddress,
+          baseTokenSymbol,
+          quoteTokenSymbol,
+          baseTokenDecimals,
+          quoteTokenDecimals,
+          flipRatio,
+          tickLower,
+          tickUpper,
+          tickCurrent,
+          tickSpacing,
+          fee,
+          poolAddress,
+        })
+      )
+
+      expect(json.name).to.contain(quoteTokenSymbol)
+      expect(json.description).to.contain(quoteTokenSymbol)
+    })
+
     describe('when the token ratio is flipped', () => {
       it('returns the valid JSON for mid ticks', async () => {
         flipRatio = true

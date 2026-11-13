@@ -1,0 +1,18 @@
+{
+  "network": "polygon",
+  "chainId": 137,
+  "deployedAt": "2026-11-13T05:22:03.964Z",
+  "deployer": "0x5cC5B49a7ca420F0ee009f294F67FC452Fc1939F",
+  "contracts": {
+    "SurpSwapFactory": "0x0dB995B73CeA857cEB24c7B3135eC9a64A12e0c6",
+    "WETH9": "0xfD6362c6b4A293697043B74b620D007C76e8b9E4",
+    "SurpSwapNFTDescriptor": "0x5327fb1F346C6C9909aa435d1c255a463aa03208",
+    "SurpSwapV3PositionDescriptor": "0x667Bbbd42e540A11EA94E5F8e6a6f140fA109703",
+    "SurpSwapV3PositionManager": "0x8eFd03bc335C671DA058971B61862fDF4749D667",
+    "SurpSwapV3SwapRouter": "0x0a1b2Dbe41Fd7C3722f9474ca6a0032675B88327",
+    "SurpSwapV3Quoter": "0xeafC9D1bFc029EF74A3632128F864AD3Cf2aa89d",
+    "SurpSwapV3QuoterV2": "0x708272A7aCf23c0E2C386Ae6ea4E0b3C4B0a7BDC",
+    "SurpSwapV3TickLens": "0x23265c2198eAFDe68e20eCA38da97BE269A4c825",
+    "SurpSwapV3Migrator": "0x320DCBE92eA71fE9004DEDe896c582238018dfF9"
+  }
+}
