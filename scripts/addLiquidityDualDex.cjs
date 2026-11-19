@@ -9,22 +9,63 @@ const TOKEN_ABI = [
 const POOL_ABI = [
   "function token0() view returns (address)",
   "function token1() view returns (address)",
+  "function slot0() view returns (uint160 sqrtPriceX96,int24 tick,uint16 observationIndex,uint16 observationCardinality,uint16 observationCardinalityNext,uint8 feeProtocol,bool unlocked)",
+  "function globalState() view returns (uint160 price,int24 tick,uint16 fee,uint16 timepointIndex,uint8 communityFeeToken0,uint8 communityFeeToken1,bool unlocked)",
 ];
 const UNISWAP_FACTORY_ABI = [
   "function getPool(address,address,uint24) view returns (address)",
+  "function feeAmountTickSpacing(uint24) view returns (int24)",
 ];
 const QUICKSWAP_FACTORY_ABI = [
   "function poolByPair(address,address) view returns (address)",
 ];
+const UNISWAP_POSITION_MANAGER_ABI = [
+  "function createAndInitializePoolIfNecessary(address,address,uint24,uint160) payable returns (address)",
+];
+const QUICKSWAP_POSITION_MANAGER_ABI = [
+  "function createAndInitializePoolIfNecessary(address,address,uint160) payable returns (address)",
+];
 const HELPER_ABI = [
+  "function UNISWAP_V3_POSITION_MANAGER() view returns (address)",
+  "function QUICKSWAP_V3_POSITION_MANAGER() view returns (address)",
   "function addUniswapV3Liquidity((address token0,address token1,uint24 fee,int24 tickLower,int24 tickUpper,uint256 amount0Desired,uint256 amount1Desired,uint256 amount0Min,uint256 amount1Min,address recipient,uint256 deadline) params) returns (uint256,uint128,uint256,uint256)",
   "function addQuickSwapV3Liquidity((address token0,address token1,int24 tickLower,int24 tickUpper,uint256 amount0Desired,uint256 amount1Desired,uint256 amount0Min,uint256 amount1Min,address recipient,uint256 deadline) params) returns (uint256,uint128,uint256,uint256)",
 ];
+const PRICE_SCALE = 10n ** 18n;
+const Q192 = 1n << 192n;
+const MIN_SQRT_RATIO = 4295128739n;
+const MAX_SQRT_RATIO = 1461446703485210103287273052203988822378723970342n;
 
 function requiredEnv(name) {
   const value = process.env[name];
   if (!value) throw new Error(`${name} harus diisi di config/networks/polygon.cjs.`);
   return value;
+}
+
+function integerSqrt(value) {
+  if (value < 2n) return value;
+  let estimate = 1n << BigInt((value.toString(2).length + 1) >> 1);
+  while (true) {
+    const next = (estimate + value / estimate) >> 1n;
+    if (next >= estimate) return estimate;
+    estimate = next;
+  }
+}
+
+function getInitialSqrtPriceX96(decimals0, decimals1) {
+  const price = requiredEnv("DUAL_LP_INITIAL_PRICE_TOKEN1_PER_TOKEN0").trim();
+  const priceX18 = hre.ethers.parseUnits(price, 18);
+  if (priceX18 === 0n) {
+    throw new Error("DUAL_LP_INITIAL_PRICE_TOKEN1_PER_TOKEN0 harus lebih besar dari nol.");
+  }
+
+  const numerator = priceX18 * (10n ** BigInt(decimals1)) * Q192;
+  const denominator = PRICE_SCALE * (10n ** BigInt(decimals0));
+  const sqrtPriceX96 = integerSqrt(numerator / denominator);
+  if (sqrtPriceX96 <= MIN_SQRT_RATIO || sqrtPriceX96 >= MAX_SQRT_RATIO) {
+    throw new Error("Harga awal menghasilkan sqrtPriceX96 di luar rentang pool V3.");
+  }
+  return sqrtPriceX96;
 }
 
 async function main() {
@@ -80,36 +121,19 @@ async function main() {
 
   let poolAddress;
   let fee;
+  let factory;
   if (dex === "uniswap") {
     fee = Number(requiredEnv("DUAL_LP_UNISWAP_FEE"));
     if (![100, 500, 3000, 10000].includes(fee)) {
       throw new Error("DUAL_LP_UNISWAP_FEE harus 100, 500, 3000, atau 10000.");
     }
     const factoryAddress = hre.ethers.getAddress(requiredEnv("DUAL_LP_UNISWAP_FACTORY"));
-    const factory = new hre.ethers.Contract(factoryAddress, UNISWAP_FACTORY_ABI, hre.ethers.provider);
+    factory = new hre.ethers.Contract(factoryAddress, UNISWAP_FACTORY_ABI, signer);
     poolAddress = await factory.getPool(token0Address, token1Address, fee);
   } else {
     const factoryAddress = hre.ethers.getAddress(requiredEnv("DUAL_LP_QUICKSWAP_FACTORY"));
-    const factory = new hre.ethers.Contract(factoryAddress, QUICKSWAP_FACTORY_ABI, hre.ethers.provider);
+    factory = new hre.ethers.Contract(factoryAddress, QUICKSWAP_FACTORY_ABI, signer);
     poolAddress = await factory.poolByPair(token0Address, token1Address);
-  }
-  if (poolAddress === hre.ethers.ZeroAddress) {
-    throw new Error(`Pool ${dex} untuk pasangan token ini belum ada. Skrip ini hanya menambah likuiditas ke pool yang sudah ada.`);
-  }
-
-  if ((await hre.ethers.provider.getCode(poolAddress)) === "0x") {
-    throw new Error(`Alamat pool ${dex} tidak memiliki bytecode: ${poolAddress}`);
-  }
-  const pool = new hre.ethers.Contract(poolAddress, POOL_ABI, hre.ethers.provider);
-  const [poolToken0, poolToken1] = await Promise.all([
-    pool.token0(),
-    pool.token1(),
-  ]);
-  if (
-    poolToken0.toLowerCase() !== token0Address.toLowerCase() ||
-    poolToken1.toLowerCase() !== token1Address.toLowerCase()
-  ) {
-    throw new Error(`Pasangan token pool ${poolAddress} tidak cocok.`);
   }
 
   const [balance0, balance1] = await Promise.all([
@@ -122,17 +146,122 @@ async function main() {
     throw new Error("Saldo wallet kurang dari jumlah likuiditas yang diminta.");
   }
 
+  const deadlineSeconds = Number(process.env.DUAL_LP_DEADLINE_SECONDS || 600);
+  if (!Number.isInteger(deadlineSeconds) || deadlineSeconds <= 0 || deadlineSeconds > 1800) {
+    throw new Error("DUAL_LP_DEADLINE_SECONDS harus integer antara 1 dan 1800.");
+  }
+  const amount0Min = minimumAmount("DUAL_LP_MIN_AMOUNT0", amount0, decimals0, slippageBps);
+  const amount1Min = minimumAmount("DUAL_LP_MIN_AMOUNT1", amount1, decimals1, slippageBps);
+  if (
+    amount0 <= 0n || amount1 <= 0n ||
+    amount0Min <= 0n || amount1Min <= 0n ||
+    amount0Min > amount0 || amount1Min > amount1
+  ) {
+    throw new Error("Desired dan minimum amounts harus > 0; minimum tidak boleh melebihi desired.");
+  }
+
   const helper = new hre.ethers.Contract(helperAddress, HELPER_ABI, signer);
+  const positionManagerAddress = dex === "uniswap"
+    ? await helper.UNISWAP_V3_POSITION_MANAGER()
+    : await helper.QUICKSWAP_V3_POSITION_MANAGER();
+  if ((await hre.ethers.provider.getCode(positionManagerAddress)) === "0x") {
+    throw new Error(`Position manager ${dex} tidak memiliki bytecode: ${positionManagerAddress}`);
+  }
+  const positionManager = new hre.ethers.Contract(
+    positionManagerAddress,
+    dex === "uniswap"
+      ? UNISWAP_POSITION_MANAGER_ABI
+      : QUICKSWAP_POSITION_MANAGER_ABI,
+    signer,
+  );
+  const createAndInitializePool = (sqrtPriceX96) => dex === "uniswap"
+    ? positionManager.createAndInitializePoolIfNecessary(
+      token0Address,
+      token1Address,
+      fee,
+      sqrtPriceX96,
+    )
+    : positionManager.createAndInitializePoolIfNecessary(
+      token0Address,
+      token1Address,
+      sqrtPriceX96,
+    );
+
+  let initialSqrtPriceX96;
+  if (poolAddress === hre.ethers.ZeroAddress) {
+    initialSqrtPriceX96 = getInitialSqrtPriceX96(decimals0, decimals1);
+    console.log(
+      `Membuat pool ${dex} pada harga ${process.env.DUAL_LP_INITIAL_PRICE_TOKEN1_PER_TOKEN0} token1 per token0.`,
+    );
+    if (dex === "uniswap") {
+      const tickSpacing = await factory.feeAmountTickSpacing(fee);
+      if (tickSpacing === 0n) {
+        throw new Error(`Uniswap fee tier ${fee} belum diaktifkan.`);
+      }
+    }
+    const tx = await createAndInitializePool(initialSqrtPriceX96);
+    const receipt = await tx.wait();
+    if (receipt.status !== 1) {
+      throw new Error(`Pembuatan dan inisialisasi pool ${dex} gagal: ${tx.hash}`);
+    }
+    poolAddress = dex === "uniswap"
+      ? await factory.getPool(token0Address, token1Address, fee)
+      : await factory.poolByPair(token0Address, token1Address);
+  }
+
+  if (poolAddress === hre.ethers.ZeroAddress) {
+    throw new Error(`Pool ${dex} tidak ditemukan setelah proses pembuatan dan inisialisasi.`);
+  }
+  if ((await hre.ethers.provider.getCode(poolAddress)) === "0x") {
+    throw new Error(`Alamat pool ${dex} tidak memiliki bytecode: ${poolAddress}`);
+  }
+
+  const pool = new hre.ethers.Contract(poolAddress, POOL_ABI, signer);
+  const [poolToken0, poolToken1] = await Promise.all([
+    pool.token0(),
+    pool.token1(),
+  ]);
+  if (
+    poolToken0.toLowerCase() !== token0Address.toLowerCase() ||
+    poolToken1.toLowerCase() !== token1Address.toLowerCase()
+  ) {
+    throw new Error(`Pasangan token pool ${poolAddress} tidak cocok.`);
+  }
+
+  const poolSqrtPriceX96 = dex === "uniswap"
+    ? (await pool.slot0()).sqrtPriceX96
+    : (await pool.globalState()).price;
+  if (poolSqrtPriceX96 === 0n) {
+    initialSqrtPriceX96 ??= getInitialSqrtPriceX96(decimals0, decimals1);
+    console.log(
+      `Menginisialisasi pool ${dex} pada harga ${process.env.DUAL_LP_INITIAL_PRICE_TOKEN1_PER_TOKEN0} token1 per token0.`,
+    );
+    const tx = await createAndInitializePool(initialSqrtPriceX96);
+    const receipt = await tx.wait();
+    if (receipt.status !== 1) {
+      throw new Error(`Inisialisasi harga awal pool ${dex} gagal: ${tx.hash}`);
+    }
+  }
+
+  const initializedSqrtPriceX96 = dex === "uniswap"
+    ? (await pool.slot0()).sqrtPriceX96
+    : (await pool.globalState()).price;
+  if (initializedSqrtPriceX96 === 0n) {
+    throw new Error(`Pool ${dex} masih belum memiliki harga awal.`);
+  }
+  if (
+    initialSqrtPriceX96 !== undefined &&
+    initializedSqrtPriceX96 !== initialSqrtPriceX96
+  ) {
+    throw new Error(`Pool ${dex} ternyata sudah diinisialisasi pada harga yang berbeda.`);
+  }
+
   console.log(`DEX: ${dex}; pool: ${poolAddress}; LP NFT recipient: ${signer.address}`);
   console.log(
     `Slippage: ${slippageBps / 100}%; jumlah ${hre.ethers.formatUnits(amount0, decimals0)} / ${hre.ethers.formatUnits(amount1, decimals1)}.`,
   );
-  const deadlineSeconds = Number(process.env.DUAL_LP_DEADLINE_SECONDS || 600);
   console.log(`Ticks: ${tickLower}..${tickUpper}; deadline: ${deadlineSeconds} detik`);
 
-  if (!Number.isInteger(deadlineSeconds) || deadlineSeconds <= 0 || deadlineSeconds > 1800) {
-    throw new Error("DUAL_LP_DEADLINE_SECONDS harus integer antara 1 dan 1800.");
-  }
   let call;
   if (dex === "uniswap") {
     call = {
@@ -156,15 +285,6 @@ async function main() {
     amount1Desired: amount1,
     recipient: signer.address,
   };
-  const amount0Min = minimumAmount("DUAL_LP_MIN_AMOUNT0", amount0, decimals0, slippageBps);
-  const amount1Min = minimumAmount("DUAL_LP_MIN_AMOUNT1", amount1, decimals1, slippageBps);
-  if (
-    amount0 <= 0n || amount1 <= 0n ||
-    amount0Min <= 0n || amount1Min <= 0n ||
-    amount0Min > amount0 || amount1Min > amount1
-  ) {
-    throw new Error("Desired dan minimum amounts harus > 0; minimum tidak boleh melebihi desired.");
-  }
   const deadline = BigInt(Math.floor(Date.now() / 1000) + deadlineSeconds);
   const params = { ...baseParams, amount0Min, amount1Min, deadline };
   console.log(

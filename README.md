@@ -241,6 +241,38 @@ npm run configure:surpsidy-pools:amoy
 
 ### Polygon
 
+### LP NFT lock
+
+Deploy `LPNFTLocker` ke Amoy atau Polygon. Durasi awalnya 10 tahun (365 hari per tahun); owner bisa mengubah durasi dengan `setLockDuration(seconds)`. Perubahan hanya berlaku untuk lock baru, tidak mempersingkat lock yang sudah berjalan. Isi `LP_NFT_UNLOCK_SIGNER_<NETWORK>` dengan alamat wallet backend di config sebelum deploy; deploy script akan mengatur alamat itu sebagai `unlockSigner`. Private key signer tetap hanya di backend. Tanpa signer terkonfigurasi, locker menolak NFT baru. Pemilik NFT memberi approval ke locker lalu memanggil `lock(nftContract, tokenId)`. Setelah `unlockTime`, beneficiary memanggil `unlock(nftContract, tokenId, deadline, signature)` dengan signature EIP-712 backend atas `Unlock(nftContract, tokenId, beneficiary, nonce, deadline)`. Jadi unlock tetap perlu backend meski masa lock habis.
+
+```bash
+npm run deploy:lp-nft-locker:amoy
+npm run deploy:lp-nft-locker:polygon
+```
+
+Untuk memakai Safe sebagai owner, isi `SAFE_ADDRESS_<NETWORK>`, lalu jalankan `finalize:ownership:<network>` dan `accept:ownership:<network>` setelah deployment. `LPNFTLocker` sudah termasuk dalam kedua alur ownership tersebut.
+
+Untuk mengubah durasi, set `LP_NFT_LOCK_DURATION_SECONDS_<NETWORK>` di config jaringan, lalu jalankan:
+
+```bash
+npm run set:lp-nft-lock-duration:amoy
+npm run set:lp-nft-lock-duration:polygon
+```
+
+Nilai durasi dalam detik. Jika owner locker adalah Safe, script menampilkan transaksi `setLockDuration` untuk diajukan melalui Safe.
+
+Untuk first add-LP pada SurpSwap, buat dan inisialisasi pool SRP/WETH9 untuk kedua fee tier dari terminal. Atur harga awal di `SURPSWAP_INITIAL_PRICE_POL_PER_SRP_POLYGON`, lalu jalankan preflight:
+
+```bash
+npm run create:surpswap-pools:polygon
+```
+
+Jika preflight benar, konfirmasi akan membuat pool fee 3000 dan 10000 pada harga awal yang sama; tiap pool yang belum siap memerlukan transaksi terpisah. Script menyimpan alamat pool, tetapi belum menambahkan likuiditas. Setelah pool siap, jalankan command `add-lp:wpol` untuk fee tier yang ingin diberi likuiditas. Konfirmasi transaksi:
+
+```bash
+CONFIRM_CREATE_SURPSWAP_POOLS=YES npm run create:surpswap-pools:polygon
+```
+
 ```bash
 npm run add-lp:polygon
 npm run add-lp:wpol:polygon
@@ -251,6 +283,14 @@ npm run deploy:lp-helper:polygon
 ```
 
 `DUAL_LP_SLIPPAGE_BPS` di `config/networks/polygon.cjs` mengatur satu batas slippage untuk satu penambahan likuiditas melalui Uniswap atau QuickSwap: `10` = 0,1%, `50` = 0,5%, atau `100` = 1%. Pilih satu nilai sebelum menjalankan `add-lp:polygon`. Jika minimum amount disetel `AUTO`, script menghitung minimum token berdasarkan nilai tersebut; jika minimum ditulis manual, nilai manual yang digunakan.
+
+Untuk inisialisasi pool saja tanpa menambahkan likuiditas, atur `DUAL_LP_DEX`, `DUAL_LP_TOKEN0`, `DUAL_LP_TOKEN1`, dan `DUAL_LP_INITIAL_PRICE_TOKEN1_PER_TOKEN0` di `config/networks/polygon.cjs`, lalu jalankan:
+
+```bash
+npm run init:dual-lp-pool:polygon
+```
+
+Untuk Uniswap, atur juga `DUAL_LP_UNISWAP_FEE`. Script ini hanya membuat/menginisialisasi pool dan menyimpan alamatnya; ia tidak melakukan approval atau mint LP. Harga awal adalah rasio token1 per token0. Pool yang sudah diinisialisasi tidak diubah. `npm run add-lp:polygon` tetap menjalankan penambahan likuiditas.
 
 Frontend dapat menawarkan slippage 0,1%, 0,5%, 1%, atau 2% dengan menghitung `amountOutMinimum` dari quote, lalu mengirim minimum tersebut ke fungsi `buy(mode, fee, amountOutMinimum, deadline)` atau `buyWithProtection(...)`. Untuk sell, minimum hasil yang sama dikirim ke `sell(...)` atau `sellForTokenB(...)`. Kontrak menerima batas jumlah minimum, seperti helper, bukan angka persentase. Buy dan sell dengan Token B tetap memiliki batas internal 2%; `amountOutMinimum` dari frontend dapat memperketat batas untuk pilihan slippage di bawah 2%.
 

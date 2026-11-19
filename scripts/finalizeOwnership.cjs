@@ -83,6 +83,7 @@ async function main() {
     ...NFT_COLLECTIONS.map((name) => [`NFT_${name}_ADDRESS`, `SRP_${name}`, false, false]),
     ["PUBLIC_STAKING_ADDRESS", "PublicStaking", false, false],
     ["INVESTOR_DIVIDEND_ADDRESS", "InvestorDividend", false, false],
+    ["LP_NFT_LOCKER_ADDRESS", "LPNFTLocker", false, true],
   ];
   const entries = mandatoryContracts.map(([envName, label, required, twoStep]) => ({
     envName,

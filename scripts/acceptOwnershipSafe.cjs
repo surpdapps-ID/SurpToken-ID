@@ -74,6 +74,7 @@ async function main() {
     ...NFT_COLLECTIONS.map((name) => [`NFT_${name}_ADDRESS`, `SRP ${name}`, false, false]),
     ["PUBLIC_STAKING_ADDRESS", "PublicStaking", false, false],
     ["INVESTOR_DIVIDEND_ADDRESS", "InvestorDividend", false, false],
+    ["LP_NFT_LOCKER_ADDRESS", "LPNFTLocker", false, true],
   ];
   const ownableAbi = [
     "function owner() view returns (address)",
